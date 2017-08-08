@@ -25,9 +25,15 @@ namespace MemeGen
 
             MemeGenerator memeGen = new MemeGenerator(image);
             var memeImage = memeGen.Generate(txtTopLine.Text,txtBottomLine.Text);
-            memeImage.Save(Server.MapPath("~/file.jpg"),System.Drawing.Imaging.ImageFormat.Jpeg);
+            String guid = Guid.NewGuid().ToString();
+            memeImage.Save(Server.MapPath("~/Memes/"+guid+".jpg"),System.Drawing.Imaging.ImageFormat.Jpeg);
 
-            MemeImage.ImageUrl = "file.jpg";
+            
+
+            MemeImage.ImageUrl = "memes/"+guid+".jpg";
+            MemeImage.AlternateText = txtTopLine.Text + ": " + txtBottomLine.Text;
+            MemeImage.Attributes.Add("width", memeImage.Width.ToString());
+            MemeImage.Attributes.Add("height", memeImage.Height.ToString());
         }
 
        
