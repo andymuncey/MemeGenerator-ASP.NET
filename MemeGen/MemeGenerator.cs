@@ -7,16 +7,16 @@ namespace MemeGen
 {
     public class MemeGenerator
     {
-        public Image SourceImage { get; set; }
+        private Image sourceImage;
 
         public MemeGenerator(Image image)
         {
-            SourceImage = image;
+            this.sourceImage = image;
         }
 
         public Image Generate(string topLine, string bottomLine)
         {
-            Image memeImage = SourceImage.Clone() as Image;
+            Image memeImage = sourceImage.Clone() as Image;
             Graphics textGraphics = Graphics.FromImage(memeImage);
 
             textGraphics.CompositingQuality = CompositingQuality.HighQuality;
@@ -26,7 +26,7 @@ namespace MemeGen
             float fontSize = 10.0f; //default starting font size - will be adjusted to fit image
             Font font = new Font(FontFamily.GenericSansSerif, fontSize, FontStyle.Bold);
 
-            float textWidthAtTenEm = Math.Max(EstimateWidthOfString(topLine, font), EstimateWidthOfString(bottomLine, font));
+            float textWidthAtTenEm = Math.Max(estimateWidthOfString(topLine, font), estimateWidthOfString(bottomLine, font));
 
             //adjust font size for actual image size
             float scale = memeImage.Width / textWidthAtTenEm;
@@ -40,7 +40,7 @@ namespace MemeGen
             textGraphics.DrawPath(thickPen, topPath);
             textGraphics.FillPath(Brushes.White, topPath);
 
-            float bottomOffset = SourceImage.Height - (fontSize * 1.2f);
+            float bottomOffset = sourceImage.Height - (fontSize * 1.2f);
             GraphicsPath bottomPath = textPathWithVerticalOffSet(bottomLine, font, bottomOffset);
             textGraphics.DrawPath(thickPen, bottomPath);
             textGraphics.FillPath(Brushes.White, bottomPath);
@@ -54,7 +54,7 @@ namespace MemeGen
         {
             GraphicsPath path = new GraphicsPath();
             path.AddString(text, font.FontFamily, (int)font.Style, font.Size, new Point(0, 0), new StringFormat());
-            float leftOffset = (SourceImage.Width - path.GetBounds().Width) / 2;
+            float leftOffset = (sourceImage.Width - path.GetBounds().Width) / 2;
             Matrix translateMatrix = new Matrix();
             translateMatrix.Translate(leftOffset, topOffset);
             path.Transform(translateMatrix);
@@ -69,7 +69,7 @@ namespace MemeGen
         /// <param name="text">The String to estimate the size of</param>
         /// <param name="font">The Font in which the text should be rendered</param>
         /// <returns></returns>
-        private float EstimateWidthOfString(string text, Font font)
+        private float estimateWidthOfString(string text, Font font)
         {
             Bitmap objBitmap = default(Bitmap);
             Graphics objGraphics = default(Graphics);

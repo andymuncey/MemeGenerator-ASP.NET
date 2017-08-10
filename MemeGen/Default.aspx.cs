@@ -28,8 +28,6 @@ namespace MemeGen
             String guid = Guid.NewGuid().ToString();
             memeImage.Save(Server.MapPath("~/Memes/"+guid+".jpg"),System.Drawing.Imaging.ImageFormat.Jpeg);
 
-            
-
             MemeImage.ImageUrl = "memes/"+guid+".jpg";
             MemeImage.AlternateText = txtTopLine.Text + ": " + txtBottomLine.Text;
             MemeImage.Attributes.Add("width", memeImage.Width.ToString());
