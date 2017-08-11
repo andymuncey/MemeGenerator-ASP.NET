@@ -23,14 +23,16 @@ namespace MemeGen
             textGraphics.SmoothingMode = SmoothingMode.HighQuality;
             textGraphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
-            float fontSize = 10.0f; //default starting font size - will be adjusted to fit image
+            float fontSize = 20.0f; //default starting font size - will be adjusted to fit image
             Font font = new Font(FontFamily.GenericSansSerif, fontSize, FontStyle.Bold);
 
-            float textWidthAtTenEm = Math.Max(estimateWidthOfString(topLine, font), estimateWidthOfString(bottomLine, font));
+            RectangleF topSize = estimateSizeOfString(topLine, font);
+            RectangleF bottomSize = estimateSizeOfString(bottomLine, font);
+            float textWidthAtTenEm = Math.Max(topSize.Width, bottomSize.Width);
 
             //adjust font size for actual image size
             float scale = memeImage.Width / textWidthAtTenEm;
-            fontSize *= scale;
+            fontSize *= scale * 0.98f;
 
             font = new Font(font.FontFamily, fontSize, font.Style); //Font object provides no mutator for size, so recreate
 
@@ -41,7 +43,7 @@ namespace MemeGen
             textGraphics.FillPath(Brushes.White, topPath);
 
             float bottomOffset = sourceImage.Height - (fontSize * 1.2f);
-            GraphicsPath bottomPath = textPathWithVerticalOffSet(bottomLine, font, bottomOffset);
+            GraphicsPath bottomPath = textPathWithVerticalOffSet(bottomLine, font, (int)bottomOffset);
             textGraphics.DrawPath(thickPen, bottomPath);
             textGraphics.FillPath(Brushes.White, bottomPath);
 
@@ -50,38 +52,28 @@ namespace MemeGen
         }
 
 
-        private GraphicsPath textPathWithVerticalOffSet(string text, Font font, float topOffset = 0)
+        private GraphicsPath textPathWithVerticalOffSet(string text, Font font, int topOffset = 0)
         {
+            StringFormat centreFormat = new StringFormat();
+            centreFormat.Alignment = StringAlignment.Center;
+            Point renderPoint = new Point(sourceImage.Width / 2, topOffset);
             GraphicsPath path = new GraphicsPath();
-            path.AddString(text, font.FontFamily, (int)font.Style, font.Size, new Point(0, 0), new StringFormat());
-            float leftOffset = (sourceImage.Width - path.GetBounds().Width) / 2;
-            Matrix translateMatrix = new Matrix();
-            translateMatrix.Translate(leftOffset, topOffset);
-            path.Transform(translateMatrix);
+            path.AddString(text, font.FontFamily, (int)font.Style, font.Size, renderPoint, centreFormat);
             return path;
         }
 
 
         /// <summary>
         /// Estimates the size of a string given a font
-        /// Adapted from Eystein Bye (2012): https://stackoverflow.com/questions/5553965/how-to-programmatically-measure-string-pixel-width-in-asp-net
         /// </summary>
-        /// <param name="text">The String to estimate the size of</param>
+        /// <param name="text">The string to estimate the size of</param>
         /// <param name="font">The Font in which the text should be rendered</param>
-        /// <returns></returns>
-        private float estimateWidthOfString(string text, Font font)
+        /// <returns>A RectangleF with the size of the String as would be rendered</returns>
+        private RectangleF estimateSizeOfString(string text, Font font)
         {
-            Bitmap objBitmap = default(Bitmap);
-            Graphics objGraphics = default(Graphics);
-
-            objBitmap = new Bitmap(500, 200);
-            objGraphics = Graphics.FromImage(objBitmap);
-
-            SizeF stringSize = objGraphics.MeasureString(text, font);
-
-            objBitmap.Dispose();
-            objGraphics.Dispose();
-            return stringSize.Width;
+            GraphicsPath path = new GraphicsPath();
+            path.AddString(text, font.FontFamily, (int)font.Style, font.Size, new Point(0, 0), new StringFormat());
+            return path.GetBounds();
         }
 
     }

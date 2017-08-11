@@ -24,7 +24,7 @@ namespace MemeGen
             System.Drawing.Image image = System.Drawing.Image.FromStream(str);
 
             MemeGenerator memeGen = new MemeGenerator(image);
-            var memeImage = memeGen.Generate(txtTopLine.Text,txtBottomLine.Text);
+            System.Drawing.Image memeImage = memeGen.Generate(txtTopLine.Text,txtBottomLine.Text);
             String guid = Guid.NewGuid().ToString();
             memeImage.Save(Server.MapPath("~/Memes/"+guid+".jpg"),System.Drawing.Imaging.ImageFormat.Jpeg);
 
