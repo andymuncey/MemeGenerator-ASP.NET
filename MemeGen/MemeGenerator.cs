@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-
+using System.Drawing.Imaging;
+using System.Linq;
 
 namespace MemeGen
 {
@@ -11,7 +12,48 @@ namespace MemeGen
 
         public MemeGenerator(Image image)
         {
-            this.sourceImage = image;
+            this.sourceImage = ProcessOrientation(image);
+        }
+
+        private Image ProcessOrientation(Image image)
+        {
+            const int ExifRotationId = 0x0112;
+
+            if (image.PropertyIdList.Contains(ExifRotationId))
+            {
+                PropertyItem rotationPropertyItem = image.GetPropertyItem(ExifRotationId);
+                UInt16 rotationValue = rotationPropertyItem.Value[0];
+                switch (rotationValue)
+                {
+                    case 1: // normal
+                        break;
+                    case 2: //mirror horizontal
+                        image.RotateFlip(rotateFlipType: RotateFlipType.RotateNoneFlipX);
+                        break;
+                    case 3: //rotate 180
+                        image.RotateFlip(rotateFlipType: RotateFlipType.Rotate180FlipNone);
+                        break;
+                    case 4: //mirror vertical
+                        image.RotateFlip(rotateFlipType: RotateFlipType.RotateNoneFlipY);
+                        break;                        
+                    case 5: // mirror horizontal and rotate 270 CW
+                        image.RotateFlip(rotateFlipType: RotateFlipType.Rotate270FlipX);
+                        break;
+                    case 6: // rotated 90 CW
+                        image.RotateFlip(rotateFlipType: RotateFlipType.Rotate90FlipNone);
+                        break;
+                    case 7: //mirror horizontal and rotate 90 CW
+                        image.RotateFlip(rotateFlipType: RotateFlipType.Rotate90FlipX);
+                        break;                    
+                    case 8: // rotate 270 CW
+                        image.RotateFlip(rotateFlipType: RotateFlipType.Rotate270FlipNone);
+                        break;
+                }
+
+                rotationPropertyItem.Value[0] = 1;
+                image.SetPropertyItem(rotationPropertyItem);
+            }
+            return image;
         }
 
         public Image Generate(string topLine, string bottomLine)
